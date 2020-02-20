@@ -32,6 +32,7 @@ public class BackgroundTimerModule extends ReactContextBaseJavaModule {
         @Override
         public void onHostDestroy() {
             if (wakeLock.isHeld()) wakeLock.release();
+            if (handler != null) sendEvent(reactContext, "backgroundTimer.closed"); 
         }
     };
 

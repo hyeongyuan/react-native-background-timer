@@ -3,8 +3,8 @@ import {
   NativeAppEventEmitter,
   NativeEventEmitter,
   NativeModules,
-  Platform,
-} from 'react-native';
+  Platform
+} from "react-native";
 
 const { RNBackgroundTimer } = NativeModules;
 const Emitter = new NativeEventEmitter(RNBackgroundTimer);
@@ -14,7 +14,7 @@ class BackgroundTimer {
     this.uniqueId = 0;
     this.callbacks = {};
 
-    Emitter.addListener('backgroundTimer.timeout', (id) => {
+    Emitter.addListener("backgroundTimer.timeout", id => {
       if (this.callbacks[id]) {
         const callbackById = this.callbacks[id];
         const { callback } = callbackById;
@@ -40,21 +40,30 @@ class BackgroundTimer {
   runBackgroundTimer(callback, delay) {
     const EventEmitter = Platform.select({
       ios: () => NativeAppEventEmitter,
-      android: () => DeviceEventEmitter,
+      android: () => DeviceEventEmitter
     })();
     this.start(0);
-    this.backgroundListener = EventEmitter.addListener('backgroundTimer', () => {
-      this.backgroundListener.remove();
-      this.backgroundClockMethod(callback, delay);
-    });
+    this.backgroundListener = EventEmitter.addListener(
+      "backgroundTimer",
+      () => {
+        this.backgroundListener.remove();
+        this.backgroundClockMethod(callback, delay);
+      }
+    );
+    this.backgroundClosedListener = EventEmitter.addListener(
+      "backgroundTimer.closed",
+      () => {
+        this.backgroundClosedListener.remove();
+        this.stopBackgroundTimer();
+      }
+    );
   }
 
   backgroundClockMethod(callback, delay) {
     this.backgroundTimer = this.setTimeout(() => {
       callback();
       this.backgroundClockMethod(callback, delay);
-    },
-    delay);
+    }, delay);
   }
 
   stopBackgroundTimer() {
@@ -69,7 +78,7 @@ class BackgroundTimer {
     this.callbacks[timeoutId] = {
       callback,
       interval: false,
-      timeout,
+      timeout
     };
     RNBackgroundTimer.setTimeout(timeoutId, timeout);
     return timeoutId;
@@ -88,7 +97,7 @@ class BackgroundTimer {
     this.callbacks[intervalId] = {
       callback,
       interval: true,
-      timeout,
+      timeout
     };
     RNBackgroundTimer.setTimeout(intervalId, timeout);
     return intervalId;
